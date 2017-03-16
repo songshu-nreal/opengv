@@ -107,6 +107,7 @@ public:
   std::vector<int> model_;
   /** the indices of the samples that have been clasified as inliers */
   std::vector<int> inliers_;
+  std::vector<double> inlier_distances_to_model_;
   /** the sample-consensus problem we are trying to solve */
   boost::shared_ptr<PROBLEM_T> sac_model_;
 };

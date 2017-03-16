@@ -173,7 +173,8 @@ public:
   virtual void selectWithinDistance(
       const model_t &model_coefficients, 
       const double threshold,
-      std::vector<int> &inliers );
+      std::vector<int>& inliers,
+      std::vector<double>& inlier_distances_to_model);
 
   /**
    * \brief Count all the inlier samples whith respect to given model

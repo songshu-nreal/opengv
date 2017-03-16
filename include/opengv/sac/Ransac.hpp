@@ -73,6 +73,7 @@ public:
   using SampleConsensus<problem_t>::model_;
   using SampleConsensus<problem_t>::model_coefficients_;
   using SampleConsensus<problem_t>::inliers_;
+  using SampleConsensus<problem_t>::inlier_distances_to_model_;
   using SampleConsensus<problem_t>::probability_;
 
   /**
