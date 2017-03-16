@@ -184,7 +184,7 @@ void
 opengv::sac::MultiSampleConsensusProblem<M>::selectWithinDistance(
     const model_t & model_coefficients,
     const double threshold,
-    std::vector<std::vector<int> > &inliers)
+    std::vector<std::vector<int> > &inliers )
 {
   std::vector<std::vector<double> > dist;
   dist.resize(indices_->size());
