@@ -166,7 +166,8 @@ void
 opengv::sac::SampleConsensusProblem<M>::selectWithinDistance(
     const model_t & model_coefficients,
     const double threshold,
-    std::vector<int> &inliers )
+    std::vector<int>& inliers,
+    std::vector<double>& inlier_distances_to_model)
 {
   std::vector<double> dist;
   dist.reserve(indices_->size());
@@ -174,10 +175,14 @@ opengv::sac::SampleConsensusProblem<M>::selectWithinDistance(
 
   inliers.clear();
   inliers.reserve(indices_->size());
+  inlier_distances_to_model.clear();
+  inlier_distances_to_model.reserve(indices_->size());
   for( size_t i = 0; i < dist.size(); ++i )
   {
-    if( dist[i] < threshold )
+    if( dist[i] < threshold ) {
       inliers.push_back( (*indices_)[i] );
+      inlier_distances_to_model.emplace_back(dist[i]);
+    }
   }
 }
 
