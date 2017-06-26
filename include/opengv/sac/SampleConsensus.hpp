@@ -41,6 +41,8 @@
 #ifndef OPENGV_SAC_SAMPLECONSENSUS_HPP_
 #define OPENGV_SAC_SAMPLECONSENSUS_HPP_
 
+#include <memory>
+
 /**
  * \brief The namespace of this library.
  */
@@ -110,7 +112,7 @@ public:
   /** the distances to the model for all inliers */
   std::vector<double> inlier_distances_to_model_;
   /** the sample-consensus problem we are trying to solve */
-  boost::shared_ptr<PROBLEM_T> sac_model_;
+  std::shared_ptr<PROBLEM_T> sac_model_;
 };
 
 } // namespace sac
