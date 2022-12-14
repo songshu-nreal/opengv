@@ -165,10 +165,10 @@ ELSE()
       include_directories(${eigen_catkin_INCLUDE_DIRS} ${eigen_catkin_INCLUDE_DIRS}/unsupported)
       message(WARNING "Eigen: " ${eigen_catkin_INCLUDE_DIRS})
 
-      cs_add_library(${PROJECT_NAME} SHARED ${OPENGV_SOURCE_FILES} ${OPENGV_HEADER_FILES})
+      cs_add_library(${PROJECT_NAME} STATIC ${OPENGV_SOURCE_FILES} ${OPENGV_HEADER_FILES})
 
       IF(NOT ANDROID_NREAL)
-          cs_add_library(random_generators SHARED
+          cs_add_library(random_generators STATIC
             test/random_generators.cpp
             test/random_generators.hpp
             test/experiment_helpers.cpp
@@ -229,8 +229,8 @@ ELSE()
       cs_export()
 
   ELSE()
-      add_library( ${PROJECT_NAME} SHARED ${OPENGV_SOURCE_FILES} ${OPENGV_HEADER_FILES} )
-      add_library( random_generators SHARED test/random_generators.cpp test/random_generators.hpp test/experiment_helpers.cpp test/experiment_helpers.hpp test/time_measurement.cpp test/time_measurement.hpp )
+      add_library( ${PROJECT_NAME} STATIC ${OPENGV_SOURCE_FILES} ${OPENGV_HEADER_FILES} )
+      add_library( random_generators STATIC test/random_generators.cpp test/random_generators.hpp test/experiment_helpers.cpp test/experiment_helpers.hpp test/time_measurement.cpp test/time_measurement.hpp )
       target_link_libraries(random_generators ${PROJECT_NAME})
 
       add_executable( test_absolute_pose test/test_absolute_pose.cpp )
