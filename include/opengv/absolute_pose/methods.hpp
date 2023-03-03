@@ -207,6 +207,13 @@ transformations_t gp3p(
     size_t index1 = 1,
     size_t index2 = 2 );
 
+transformations_t gp3p_lee(
+    const AbsoluteAdapterBase & adapter,
+    const std::vector<int> & indices );
+
+transformations_t gp3p_kukelova(
+    const AbsoluteAdapterBase & adapter,
+    const std::vector<int> & indices );
 /**
  * \brief Compute the pose of a central viewpoint using the EPnP method [4].
  *        Using all available correspondences.

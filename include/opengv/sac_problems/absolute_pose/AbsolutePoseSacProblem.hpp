@@ -81,7 +81,9 @@ public:
     KNEIP = 1,     // central     [1]
     GAO = 2,       // central     [2]
     EPNP = 3,      // central     [4]
-    GP3P = 4       // non-central [3]
+    GP3P_KNEIP = 4,       // non-central [3]
+    GP3P_LEE = 5, // non-central [5]
+    GP3P_KUKELOVA = 6,    // non-central [6]
   } algorithm_t;
 
   /**

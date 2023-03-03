@@ -40,81 +40,90 @@ opengv::sac_problems::
 {
   transformations_t solutions;
 
-  switch(_algorithm)
-  {
-  case TWOPT:
-  {
-    rotation_t rotation = _adapter.getR();
-    translation_t translation = opengv::absolute_pose::p2p(_adapter,indices);
-    
-    transformation_t solution;
-    translation_t t_bc = _adapter.getCamOffset(indices[0]);
-    rotation_t R_bc = _adapter.getCamRotation(indices[0]);
-    solution.col(3) = translation - rotation * R_bc.transpose() * t_bc;
-    solution.block<3,3>(0,0) = rotation * R_bc.transpose();
-
-    solutions.push_back(solution);
-    break;
-  }
-  case KNEIP:
-  {
-    solutions = opengv::absolute_pose::p3p_kneip(_adapter,indices);
-
-    //transform solution into body frame (case of single shifted cam)
-    translation_t t_bc = _adapter.getCamOffset(indices[0]);
-    rotation_t R_bc = _adapter.getCamRotation(indices[0]);
-
-    for(size_t i = 0; i < solutions.size(); i++)
+  switch(_algorithm) {
+    case TWOPT:
     {
-      translation_t translation = solutions[i].col(3);
-      rotation_t rotation = solutions[i].block<3,3>(0,0);
-      solutions[i].col(3) = translation - rotation * R_bc.transpose() * t_bc;
-      solutions[i].block<3,3>(0,0) = rotation * R_bc.transpose();
+      rotation_t rotation = _adapter.getR();
+      translation_t translation = opengv::absolute_pose::p2p(_adapter,indices);
+
+      transformation_t solution;
+      translation_t t_bc = _adapter.getCamOffset(indices[0]);
+      rotation_t R_bc = _adapter.getCamRotation(indices[0]);
+      solution.col(3) = translation - rotation * R_bc.transpose() * t_bc;
+      solution.block<3,3>(0,0) = rotation * R_bc.transpose();
+
+      solutions.push_back(solution);
+      break;
     }
-
-    break;
-  }
-  case GAO:
-  {
-    solutions = opengv::absolute_pose::p3p_gao(_adapter,indices);
-
-    //transform solution into body frame (case of single shifted cam)
-    translation_t t_bc = _adapter.getCamOffset(indices[0]);
-    rotation_t R_bc = _adapter.getCamRotation(indices[0]);
-
-    for(size_t i = 0; i < solutions.size(); i++)
+    case KNEIP:
     {
-      translation_t translation = solutions[i].col(3);
-      rotation_t rotation = solutions[i].block<3,3>(0,0);
-      solutions[i].col(3) = translation - rotation * R_bc.transpose() * t_bc;
-      solutions[i].block<3,3>(0,0) = rotation * R_bc.transpose();
+      solutions = opengv::absolute_pose::p3p_kneip(_adapter,indices);
+
+      //transform solution into body frame (case of single shifted cam)
+      translation_t t_bc = _adapter.getCamOffset(indices[0]);
+      rotation_t R_bc = _adapter.getCamRotation(indices[0]);
+
+      for(size_t i = 0; i < solutions.size(); i++)
+      {
+        translation_t translation = solutions[i].col(3);
+        rotation_t rotation = solutions[i].block<3,3>(0,0);
+        solutions[i].col(3) = translation - rotation * R_bc.transpose() * t_bc;
+        solutions[i].block<3,3>(0,0) = rotation * R_bc.transpose();
+      }
+
+      break;
     }
+    case GAO:
+    {
+      solutions = opengv::absolute_pose::p3p_gao(_adapter,indices);
 
-    break;
-  }
-  case EPNP:
-  {
-    transformation_t solution = opengv::absolute_pose::epnp(_adapter,indices);
+      //transform solution into body frame (case of single shifted cam)
+      translation_t t_bc = _adapter.getCamOffset(indices[0]);
+      rotation_t R_bc = _adapter.getCamRotation(indices[0]);
 
-    //transform solution into body frame (case of single shifted cam)
-    translation_t t_bc = _adapter.getCamOffset(indices[0]);
-    rotation_t R_bc = _adapter.getCamRotation(indices[0]);
+      for(size_t i = 0; i < solutions.size(); i++)
+      {
+        translation_t translation = solutions[i].col(3);
+        rotation_t rotation = solutions[i].block<3,3>(0,0);
+        solutions[i].col(3) = translation - rotation * R_bc.transpose() * t_bc;
+        solutions[i].block<3,3>(0,0) = rotation * R_bc.transpose();
+      }
 
-    translation_t translation = solution.col(3);
-    rotation_t rotation = solution.block<3,3>(0,0);
-    solution.col(3) = translation - rotation * R_bc.transpose() * t_bc;
-    solution.block<3,3>(0,0) = rotation * R_bc.transpose();
+      break;
+    }
+    case EPNP:
+    {
+      transformation_t solution = opengv::absolute_pose::epnp(_adapter,indices);
 
-    solutions.push_back(solution);
-    break;
+      //transform solution into body frame (case of single shifted cam)
+      translation_t t_bc = _adapter.getCamOffset(indices[0]);
+      rotation_t R_bc = _adapter.getCamRotation(indices[0]);
+
+      translation_t translation = solution.col(3);
+      rotation_t rotation = solution.block<3,3>(0,0);
+      solution.col(3) = translation - rotation * R_bc.transpose() * t_bc;
+      solution.block<3,3>(0,0) = rotation * R_bc.transpose();
+
+      solutions.push_back(solution);
+      break;
+    }
+    case GP3P_KNEIP:
+    {
+      solutions = opengv::absolute_pose::gp3p(_adapter,indices);
+      break;
+    }
+    case GP3P_LEE:
+    {
+      solutions = opengv::absolute_pose::gp3p_lee(_adapter,indices);
+      break;
+    }
+    case GP3P_KUKELOVA:
+    {
+      solutions = opengv::absolute_pose::gp3p_kukelova(_adapter,indices);
+      break;
+    }
   }
-  case GP3P:
-  {
-    solutions = opengv::absolute_pose::gp3p(_adapter,indices);
-    break;
-  }
-  }
-  
+
   if( solutions.size() == 1 )
   {
     outModel = solutions[0];

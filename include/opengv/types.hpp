@@ -47,6 +47,10 @@
  */
 namespace opengv
 {
+typedef Eigen::Matrix<double, 6, 1> pluecker_t;
+
+typedef std::vector<pluecker_t, Eigen::aligned_allocator<pluecker_t> >
+    plueckers_t;
 
 /** A 3-vector of unit length used to describe landmark observations/bearings
  *  in camera frames (always expressed in camera frames)
@@ -125,6 +129,14 @@ typedef Eigen::Vector3d
 /** An array of 3D-points */
 typedef std::vector<point_t, Eigen::aligned_allocator<point_t> >
     points_t;
+
+/** A 3-vector describing depth */
+typedef Eigen::Vector3d
+    depth_t;
+
+/** An array of depths */
+typedef std::vector<depth_t, Eigen::aligned_allocator<depth_t> >
+    depths_t;
 
 /** A 3-vector containing the Eigenvalues of matrix \f$ \mathbf{M} \f$ in the
  *  eigensolver-algorithm (described in [11])
