@@ -524,8 +524,8 @@ opengv::absolute_pose::modules::gp3p_kukelova_main(
 
   solutions.clear();
   for (int i = 0; i < n_sols; ++i) {
-    Eigen::Matrix3d R = math::quat_to_rotmat(tmp_solutions.col(i));
-    Eigen::Vector3d t = -B * (A.block<3, 9>(0, 3) * math::quat_to_rotmatvec(
+    Eigen::Matrix3d R = math::quat_to_rotmat(tmp_solutions.col(i)).transpose();
+    Eigen::Vector3d t = R * B * (A.block<3, 9>(0, 3) * math::quat_to_rotmatvec(
         tmp_solutions.col(i)) + A.block<3, 1>(0, 12));
 
     transformation_t pose;
