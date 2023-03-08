@@ -31,6 +31,7 @@
 
 #include <opengv/absolute_pose/modules/gp3p_lee/modules.hpp>
 #include <opengv/math/polynomial.h>
+#include <array>
 
 // Check whether the rays are close to parallel.
 bool opengv::absolute_pose::modules::gp3p_lee::CheckParallelRays(
