@@ -55,6 +55,16 @@ void gp3p_main(
     const Eigen::Matrix3d & v,
     const Eigen::Matrix3d & p,
     transformations_t & solutions );
+void gp3p_lee_main(
+    const Eigen::Matrix3d & f,
+    const Eigen::Matrix3d & v,
+    const points_t & points,
+    transformations_t & solutions );
+void gp3p_kukelova_main(
+    const Eigen::Matrix3d & f,
+    const Eigen::Matrix3d & v,
+    const Eigen::Matrix3d & p,
+    transformations_t & solutions );
 void gpnp_main(
     const Eigen::Matrix<double,12,1> & a,
     const Eigen::Matrix<double,12,12> & V,

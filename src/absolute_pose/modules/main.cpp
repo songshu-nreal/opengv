@@ -34,6 +34,8 @@
 
 #include <opengv/absolute_pose/modules/main.hpp>
 #include <opengv/absolute_pose/modules/gp3p/modules.hpp>
+#include <opengv/absolute_pose/modules/gp3p_lee/modules.hpp>
+#include <opengv/absolute_pose/modules/gp3p_kukelova/modules.hpp>
 #include <opengv/absolute_pose/modules/gpnp1/modules.hpp>
 #include <opengv/absolute_pose/modules/gpnp2/modules.hpp>
 #include <opengv/absolute_pose/modules/gpnp3/modules.hpp>
@@ -45,6 +47,7 @@
 #include <opengv/math/roots.hpp>
 #include <opengv/math/arun.hpp>
 #include <opengv/math/cayley.hpp>
+#include <opengv/math/quaternion.hpp>
 
 void
 opengv::absolute_pose::modules::p3p_kneip_main(
@@ -433,6 +436,104 @@ opengv::absolute_pose::modules::gp3p_main(
       solutions.push_back(transformation);
     }
   }
+}
+
+void
+opengv::absolute_pose::modules::gp3p_lee_main(
+    const Eigen::Matrix3d & f,
+    const Eigen::Matrix3d & v,
+    const points_t & points,
+    transformations_t & solutions)
+{
+  solutions.clear();
+
+  if (gp3p_lee::CheckCollinearPoints(points[0], points[1], points[2])) {
+    return;
+  }
+
+  // Transform 2D points into compact Pluecker line representation.
+  plueckers_t plueckers(3);
+  gp3p_lee::ComposePlueckerLine(f, v, plueckers);
+
+
+  if (gp3p_lee::CheckParallelRays(plueckers[0].head<3>(), plueckers[1].head<3>(),
+                        plueckers[2].head<3>())) {
+    return;
+  }
+
+  // Compute the coefficients k1, k2, k3 using Eq. 4.
+  Eigen::Matrix<double, 3, 6> K;
+  gp3p_lee::ComputePolynomialCoefficients(plueckers, points, K);
+
+  // Compute the depths along the Pluecker lines of the observations.
+  depths_t depths;
+  gp3p_lee::ComputeDepthsSylvester(K, depths);
+  if (depths.empty()) {
+    return;
+  }
+
+  // For all valid depth values, compute the transformation between points in
+  // the camera and the world frame. This uses Umeyama's method rather than the
+  // algorithm proposed in the paper, since Umeyama's method is numerically more
+  // stable and this part is not a bottleneck.
+
+  Eigen::Matrix3d points3D_world;
+  for (size_t i = 0; i < 3; ++i) {
+    points3D_world.col(i) = points[i];
+  }
+
+  for (size_t i = 0; i < depths.size(); ++i) {
+    Eigen::Matrix3d points3D_camera;
+    for (size_t j = 0; j < 3; ++j) {
+      points3D_camera.col(j) =
+          gp3p_lee::PointFromPlueckerLineAndDepth(plueckers[j], depths[i][j]);
+    }
+
+    const Eigen::Matrix4d transform =
+        Eigen::umeyama(points3D_camera, points3D_world, false);
+    solutions.emplace_back(transform.topLeftCorner<3, 4>());
+  }
+
+  return;
+}
+
+void
+opengv::absolute_pose::modules::gp3p_kukelova_main(
+    const Eigen::Matrix3d & f,
+    const Eigen::Matrix3d & v,
+    const Eigen::Matrix3d & p,
+    transformations_t & solutions)
+{
+  Eigen::Matrix<double, 6, 13> A;
+
+  for (int i = 0; i < 3; ++i) {
+    // xx = [x3 0 -x1; 0 x3 -x2]
+    // eqs = [xx kron(X',xx), -xx*p] * [t; vec(R); 1]
+
+    A.row(2 * i) << f(2, i), 0.0, -f(0, i), p(0, i) * f(2, i), 0.0, -p(0, i) * f(0, i), p(1, i) * f(2, i), 0.0,
+        -p(1, i) * f(0, i), p(2, i) * f(2, i), 0.0, -p(2, i) * f(0, i), -v(0, i) * f(2, i) + v(2, i) * f(0, i);
+    A.row(2 * i + 1) << 0.0, f(2, i), -f(1, i), 0.0, p(0, i) * f(2, i), -p(0, i) * f(1, i), 0.0, p(1, i) * f(2, i),
+        -p(1, i) * f(1, i), 0.0, p(2, i) * f(2, i), -p(2, i) * f(1, i), -v(1, i) * f(2, i) + v(2, i) * f(1, i);
+  }
+
+  Eigen::Matrix3d B = A.block<3, 3>(0, 0).inverse();
+
+  Eigen::Matrix<double, 3, 10> AR = A.block<3, 10>(3, 3) - A.block<3, 3>(3, 0) * B * A.block<3, 10>(0, 3);
+  Eigen::Matrix<double, 4, 8> tmp_solutions;
+  int n_sols = gp3p_kukelova::re3q3_rotation(AR, &tmp_solutions);
+
+  solutions.clear();
+  for (int i = 0; i < n_sols; ++i) {
+    Eigen::Matrix3d R = math::quat_to_rotmat(tmp_solutions.col(i)).transpose();
+    Eigen::Vector3d t = R * B * (A.block<3, 9>(0, 3) * math::quat_to_rotmatvec(
+        tmp_solutions.col(i)) + A.block<3, 1>(0, 12));
+
+    transformation_t pose;
+    pose.block<3, 3>(0, 0) = R;
+    pose.block<3, 1>(0, 3) = t;
+    solutions.emplace_back(pose);
+  }
+  return;
 }
 
 void

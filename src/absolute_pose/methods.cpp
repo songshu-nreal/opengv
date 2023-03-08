@@ -231,6 +231,64 @@ opengv::absolute_pose::gp3p(
   return gp3p(adapter,indices);
 }
 
+opengv::transformations_t
+opengv::absolute_pose::gp3p_lee(
+    const AbsoluteAdapterBase & adapter,
+    const std::vector<int> & indices )
+{
+  assert(indices.size()>2);
+
+  Eigen::Matrix3d f;
+  Eigen::Matrix3d v;
+  points_t p;
+
+  for(size_t i = 0; i < 3; i++)
+  {
+    f.col(i) = adapter.getBearingVector(indices[i]);
+    rotation_t R = adapter.getCamRotation(indices[i]);
+
+    //unrotate the bearingVectors already so the camera rotation doesn't appear
+    //in the problem
+    f.col(i) = R * f.col(i);
+    v.col(i) = adapter.getCamOffset(indices[i]);
+    p.push_back(adapter.getPoint(indices[i]));
+  }
+
+  transformations_t solutions;
+  modules::gp3p_lee_main(f,v,p,solutions);
+
+  return solutions;
+}
+
+opengv::transformations_t
+opengv::absolute_pose::gp3p_kukelova(
+    const AbsoluteAdapterBase & adapter,
+    const std::vector<int> & indices )
+{
+  assert(indices.size()>2);
+
+  Eigen::Matrix3d f;
+  Eigen::Matrix3d v;
+  Eigen::Matrix3d p;
+
+  for(size_t i = 0; i < 3; i++)
+  {
+    f.col(i) = adapter.getBearingVector(indices[i]);
+    rotation_t R = adapter.getCamRotation(indices[i]);
+
+    //unrotate the bearingVectors already so the camera rotation doesn't appear
+    //in the problem
+    f.col(i) = R * f.col(i);
+    v.col(i) = adapter.getCamOffset(indices[i]);
+    p.col(i) = adapter.getPoint(indices[i]);
+  }
+
+  transformations_t solutions;
+  modules::gp3p_kukelova_main(f,v,p,solutions);
+
+  return solutions;
+}
+
 namespace opengv
 {
 namespace absolute_pose

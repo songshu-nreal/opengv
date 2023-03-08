@@ -100,7 +100,7 @@ int main( int argc, char** argv )
       sac_problems::absolute_pose::AbsolutePoseSacProblem> absposeproblem_ptr(
       new sac_problems::absolute_pose::AbsolutePoseSacProblem(
       adapter,
-      sac_problems::absolute_pose::AbsolutePoseSacProblem::GP3P));
+      sac_problems::absolute_pose::AbsolutePoseSacProblem::GP3P_KNEIP));
   ransac.sac_model_ = absposeproblem_ptr;
   ransac.threshold_ = 1.0 - cos(atan(sqrt(2.0)*0.5/800.0));
   ransac.max_iterations_ = 50;

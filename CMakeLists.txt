@@ -42,6 +42,9 @@ set(OPENGV_SOURCE_FILES
   src/absolute_pose/modules/gp3p/init.cpp
   src/absolute_pose/modules/gp3p/reductors.cpp
   src/absolute_pose/modules/gp3p/spolynomials.cpp
+  src/absolute_pose/modules/gp3p_lee/code.cpp
+  src/absolute_pose/modules/gp3p_lee/generalized_absolute_pose_coeffs.cc
+  src/absolute_pose/modules/gp3p_kukelova/re3q3.cc
   src/absolute_pose/modules/Epnp.cpp
   src/absolute_pose/modules/gpnp1/code.cpp
   src/absolute_pose/modules/gpnp1/init.cpp
@@ -81,6 +84,7 @@ set(OPENGV_SOURCE_FILES
   src/math/Sturm.cpp
   src/math/roots.cpp
   src/math/gauss_jordan.cpp
+  src/math/polynomial.cc
   src/absolute_pose/methods.cpp
   src/absolute_pose/CentralAbsoluteAdapter.cpp
   src/absolute_pose/NoncentralAbsoluteAdapter.cpp
