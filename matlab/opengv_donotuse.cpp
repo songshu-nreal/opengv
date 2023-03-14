@@ -74,6 +74,7 @@ static const char *copyright =
 
 //expose all ransac-facilities to matlab
 #include <opengv/sac/Ransac.hpp>
+#include <opengv/sac/LoRansac.hpp>
 #include <opengv/sac_problems/absolute_pose/AbsolutePoseSacProblem.hpp>
 #include <opengv/sac_problems/relative_pose/CentralRelativePoseSacProblem.hpp>
 #include <opengv/sac_problems/relative_pose/NoncentralRelativePoseSacProblem.hpp>

@@ -122,7 +122,7 @@ int main( int argc, char** argv )
   std::cout << "the ransac threshold is: " << ransac.threshold_ << std::endl;
   std::cout << "the ransac results is: " << std::endl;
   std::cout << ransac.model_coefficients_ << std::endl << std::endl;
-  std::cout << "Ransac needed " << ransac.iterations_ << " iterations and ";
+  std::cout << "Ransac needed " << ransac.current_iterations_ << " iterations and ";
   std::cout << ransac_time << " seconds" << std::endl << std::endl;
   size_t numberInliers = 0;
   for(size_t i = 0; i < ransac.inliers_.size(); i++)

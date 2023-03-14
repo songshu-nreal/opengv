@@ -32,8 +32,19 @@
 
 template<typename P>
 opengv::sac::SampleConsensus<P>::SampleConsensus(
+    int maxIterations, int minIterations,
+    double threshold, double probability) :
+    max_iterations_(maxIterations),
+    min_iterations_(minIterations),
+    threshold_(threshold),
+    probability_(probability)
+{}
+
+template<typename P>
+opengv::sac::SampleConsensus<P>::SampleConsensus(
     int maxIterations, double threshold, double probability) :
     max_iterations_(maxIterations),
+    min_iterations_(0),
     threshold_(threshold),
     probability_(probability)
 {}

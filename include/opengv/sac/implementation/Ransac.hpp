@@ -48,9 +48,10 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
   typedef PROBLEM_T problem_t;
   typedef typename problem_t::model_t model_t;
 
-  iterations_ = 0;
+  current_iterations_ = 0;
   int n_best_inliers_count = -INT_MAX;
   double k = 1.0;
+  uint32_t max_num_iterations = std::max(max_iterations_, min_iterations_);
 
   std::vector<int> selection;
   model_t model_coefficients;
@@ -59,13 +60,13 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
   unsigned skipped_count = 0;
   // supress infinite loops by just allowing 10 x maximum allowed iterations for
   // invalid model parameters!
-  const unsigned max_skip = max_iterations_ * 10;
+  const unsigned max_skip = max_num_iterations * 10;
 
   // Iterate
-  while( iterations_ < k && skipped_count < max_skip )
+  while( current_iterations_ < k && skipped_count < max_skip )
   {
     // Get X samples which satisfy the model criteria
-    sac_model_->getSamples( iterations_, selection );
+    sac_model_->getSamples( current_iterations_, selection );
 
     if(selection.empty()) 
     {
@@ -77,7 +78,7 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
     // Search for inliers in the point cloud for the current plane model M
     if(!sac_model_->computeModelCoefficients( selection, model_coefficients ))
     {
-      //++iterations_;
+      //++current_iterations;
       ++ skipped_count;
       continue;
     }
@@ -112,12 +113,12 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
       k = log(1.0 - probability_) / log(p_no_outliers);
     }
 
-    ++iterations_;
+    ++current_iterations_;
     if(debug_verbosity_level > 1)
       fprintf(stdout,
           "[sm::RandomSampleConsensus::computeModel] Trial %d out of %f: %d inliers (best is: %d so far).\n",
-          iterations_, k, n_inliers_count, n_best_inliers_count );
-    if(iterations_ > max_iterations_)
+              current_iterations_, k, n_inliers_count, n_best_inliers_count );
+    if(current_iterations_ > max_num_iterations)
     {
       if(debug_verbosity_level > 0)
         fprintf(stdout,

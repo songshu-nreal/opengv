@@ -31,16 +31,18 @@
 //Note: has been derived from ROS
 
 /**
- * \file Ransac.hpp
+ * \file LoRansac.hpp
  * \brief Implementation of the Ransac algorithm as outlined in [15].
  */
 
-#ifndef OPENGV_SAC_RANSAC_HPP_
-#define OPENGV_SAC_RANSAC_HPP_
+#ifndef OPENGV_SAC_LORANSAC_HPP_
+#define OPENGV_SAC_LORANSAC_HPP_
 
 #include <vector>
 #include <opengv/sac/SampleConsensus.hpp>
 #include <cstdio>
+#include <numeric>
+#include <random>
 
 /**
  * \brief The namespace of this library.
@@ -52,19 +54,50 @@ namespace opengv
  */
 namespace sac
 {
+    // See Lebeda et al., Fixing the Locally Optimized RANSAC, BMVC, Table 1 for
+// details on the variables.
+class LORansacOptions {
+public:
+    LORansacOptions()
+        : num_lo_steps_(10),
+          threshold_multiplier_(std::sqrt(2.0)),
+          num_lsq_iterations_(4),
+          min_sample_multiplicator_(7),
+          non_min_sample_multiplier_(3),
+          lo_starting_iterations_(50u),
+          final_least_squares_(false) {}
+    int num_lo_steps_;
+    double threshold_multiplier_;
+    int num_lsq_iterations_;
+    // The maximum number of data points used for least squares refinement is
+    // min_sample_multiplicator_ * min_sample_size. Lebeda et al. recommend
+    // setting min_sample_multiplicator_ to 7 (empirically determined for
+    // epipolar geometry estimation.
+    int min_sample_multiplicator_;
+    // The solver needs to report the minimal size of the non-minimal sample
+    // needed for its non-minimal solver. In practice, we draw a sample of size
+    // min(non_min_sample_size * non_min_sample_multiplier_, N / 2), where N is
+    // the number of data points.
+    int non_min_sample_multiplier_;
+    // As suggested in Sec. 4.4 in Lebeda et al., Local Optimization is only
+    // performed after the first K_start iterations (set to 50 by Lebeda et al.)
+    // to reduce overhead.
+    uint32_t lo_starting_iterations_;
+    bool final_least_squares_;
+};
     
 /**
  * The Ransac sample consensus method, as outlined in [15].
  */
 template<typename PROBLEM_T>
-class Ransac : public SampleConsensus<PROBLEM_T>
+class LoRansac : public SampleConsensus<PROBLEM_T>
 {
 public:
   /** A child of SampleConsensusProblem */
   typedef PROBLEM_T problem_t;
   /** The model we trying to fit */
   typedef typename problem_t::model_t model_t;
-
+  
   using SampleConsensus<problem_t>::max_iterations_;
   using SampleConsensus<problem_t>::min_iterations_;
   using SampleConsensus<problem_t>::threshold_;
@@ -74,29 +107,50 @@ public:
   using SampleConsensus<problem_t>::model_coefficients_;
   using SampleConsensus<problem_t>::inliers_;
   using SampleConsensus<problem_t>::inlier_distances_to_model_;
+  using SampleConsensus<problem_t>::score_;
   using SampleConsensus<problem_t>::probability_;
 
   /**
    * \brief Constructor.
    */
-  Ransac(
+  LoRansac(
       int maxIterations = 1000,
+      int minIterations = 100,
+      double threshold = 1.0,
+      double probability = 0.99 );
+
+  LoRansac(
+      const LORansacOptions& lo_options,
+      int maxIterations = 1000,
+      int minIterations = 100,
       double threshold = 1.0,
       double probability = 0.99 );
   /**
    * \brief Destructor.
    */
-  virtual ~Ransac();
+  virtual ~LoRansac();
 
   /**
    * \brief Fit the model.
    */
   bool computeModel( int debug_verbosity_level = 0 );
+
+  void LocalOptimization(
+        model_t* best_minimal_model, double* score_best_minimal_model) const;
+
+  void ScoreModel(
+        const model_t& model, double squared_inlier_threshold, double* score) const;
+
+  void LeastSquaresFit(double thresh, model_t* model) const;
+
+  void UpdateBestModel(
+      double score_curr, const model_t& m_curr, double* score_best, model_t* m_best) const;
+
+  LORansacOptions lo_options_;
 };
 
 } // namespace sac
 } // namespace opengv
 
-#include "implementation/Ransac.hpp"
-
-#endif /* OPENGV_SAC_RANSAC_HPP_ */
+#include "implementation/LoRansac.hpp"
+#endif /* OPENGV_SAC_LORANSAC_HPP_ */
