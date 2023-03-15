@@ -87,7 +87,7 @@ public:
    *                       parameter keeps track of the iterations.
    * \param[out] samples The indices of the samples we attempt to use.
    */
-  virtual void getSamples( int &iterations, std::vector<int> &samples );
+  virtual void getSamples( int &iterations, std::vector<int> &samples, bool lo_sample = false);
 
   /**
    * \brief Check if a set of samples for model generation is degenerate
@@ -116,6 +116,7 @@ public:
    */
   virtual int getSampleSize() const = 0;
 
+  virtual  int getLoSampleSize() const {}
   /**
    * \brief Compute a model from a set of samples. Needs implementation in the
    *        child-class.
@@ -127,6 +128,9 @@ public:
       const std::vector<int> & indices,
       model_t & outModel) const = 0;
 
+  virtual bool computeLoModelCoefficients(
+      const std::vector<int> & indices,
+      model_t & outModel) const {}
   /**
    * \brief Refine the model coefficients over a given set (inliers). Needs
    *        implementation in the child-class.

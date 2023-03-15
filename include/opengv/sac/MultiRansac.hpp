@@ -71,7 +71,7 @@ public:
   
   using MultiSampleConsensus<problem_t>::max_iterations_;
   using MultiSampleConsensus<problem_t>::threshold_;
-  using MultiSampleConsensus<problem_t>::iterations_;
+  using MultiSampleConsensus<problem_t>::current_iterations_;
   using MultiSampleConsensus<problem_t>::sac_model_;
   using MultiSampleConsensus<problem_t>::model_;
   using MultiSampleConsensus<problem_t>::model_coefficients_;

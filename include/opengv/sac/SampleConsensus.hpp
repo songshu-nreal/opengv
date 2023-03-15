@@ -75,7 +75,13 @@ public:
    * \param[in] probability The probability of being able to draw at least one
    *                        sample that is free of outliers (see [15])
    */
-  SampleConsensus(
+  explicit SampleConsensus(
+      int maxIterations = 1000,
+      int minIterations = 100,
+      double threshold = 1.0,
+      double probability = 0.99 );
+
+  explicit SampleConsensus(
       int maxIterations = 1000,
       double threshold = 1.0,
       double probability = 0.99 );
@@ -97,8 +103,10 @@ public:
   
   /** the maximum number of iterations */
   int max_iterations_;
+  /** the minimum number of iterations */
+  int min_iterations_;
   /** the current number of iterations */
-  int iterations_;
+  int current_iterations_;
   /** the threshold for classifying inliers */
   double threshold_;
   /** the current probability (defines remaining iterations) */
@@ -111,6 +119,7 @@ public:
   std::vector<int> inliers_;
   /** the distances to the model for all inliers */
   std::vector<double> inlier_distances_to_model_;
+  double score_;
   /** the sample-consensus problem we are trying to solve */
   std::shared_ptr<PROBLEM_T> sac_model_;
 };

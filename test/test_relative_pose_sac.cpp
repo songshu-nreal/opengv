@@ -133,7 +133,7 @@ int main( int argc, char** argv )
   std::cout << "the normalized translation is: " << std::endl;
   std::cout << ransac.model_coefficients_.col(3)/
       ransac.model_coefficients_.col(3).norm() << std::endl << std::endl;
-  std::cout << "Ransac needed " << ransac.iterations_ << " iterations and ";
+  std::cout << "Ransac needed " << ransac.current_iterations_ << " iterations and ";
   std::cout << ransac_time << " seconds" << std::endl << std::endl;
   std::cout << "the number of inliers is: " << ransac.inliers_.size();
   std::cout << std::endl << std::endl;

@@ -35,6 +35,7 @@
 #include <opengv/relative_pose/methods.hpp>
 #include <opengv/relative_pose/CentralRelativeAdapter.hpp>
 #include <opengv/sac/Ransac.hpp>
+#include <opengv/sac/LoRansac.hpp>
 #include <opengv/sac_problems/relative_pose/EigensolverSacProblem.hpp>
 #include <sstream>
 #include <fstream>
@@ -126,7 +127,7 @@ int main( int argc, char** argv )
   //print the results
   std::cout << "the ransac results is: " << std::endl;
   std::cout << ransac.model_coefficients_.rotation << std::endl << std::endl;
-  std::cout << "Ransac needed " << ransac.iterations_ << " iterations and ";
+  std::cout << "Ransac needed " << ransac.current_iterations_ << " iterations and ";
   std::cout << ransac_time << " seconds" << std::endl << std::endl;
   std::cout << "the number of inliers is: " << ransac.inliers_.size();
   std::cout << std::endl << std::endl;

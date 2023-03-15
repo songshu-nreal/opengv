@@ -32,15 +32,14 @@
 #include <opengv/sac_problems/absolute_pose/AbsolutePoseSacProblem.hpp>
 #include <opengv/absolute_pose/methods.hpp>
 
-bool
-opengv::sac_problems::
-    absolute_pose::AbsolutePoseSacProblem::computeModelCoefficients(
+bool opengv::sac_problems::
+absolute_pose::AbsolutePoseSacProblem::computeModelCoefficients(
     const std::vector<int> &indices,
-    model_t & outModel) const
-{
+    algorithm_t algorithm,
+    model_t & outModel) const {
   transformations_t solutions;
 
-  switch(_algorithm) {
+  switch(algorithm) {
     case TWOPT:
     {
       rotation_t rotation = _adapter.getR();
@@ -122,6 +121,17 @@ opengv::sac_problems::
       solutions = opengv::absolute_pose::gp3p_kukelova(_adapter,indices);
       break;
     }
+    case GPNP:
+    {
+      transformation_t solution = opengv::absolute_pose::gpnp(_adapter,indices);
+      solutions.push_back(solution);
+      break;
+    }
+    case UPNP:
+    {
+      solutions = opengv::absolute_pose::upnp(_adapter,indices);
+      break;
+    }
   }
 
   if( solutions.size() == 1 )
@@ -129,7 +139,7 @@ opengv::sac_problems::
     outModel = solutions[0];
     return true;
   }
-  
+
   //now compute reprojection error of fourth point, in order to find the right one
   double minScore = 1000000.0;
   int minIndex = -1;
@@ -169,6 +179,26 @@ opengv::sac_problems::
     return false;
   outModel = solutions[minIndex];
   return true;
+}
+
+bool
+opengv::sac_problems::
+    absolute_pose::AbsolutePoseSacProblem::computeModelCoefficients(
+    const std::vector<int> &indices,
+    model_t & outModel) const
+{
+  algorithm_t algorithm = _algorithm;
+  return computeModelCoefficients(indices, algorithm, outModel);
+}
+
+bool
+opengv::sac_problems::
+absolute_pose::AbsolutePoseSacProblem::computeLoModelCoefficients(
+    const std::vector<int> &indices,
+    model_t & outModel) const
+{
+  algorithm_t algorithm = _lo_algorithm;
+  return computeModelCoefficients(indices, algorithm, outModel);
 }
 
 void
@@ -226,7 +256,19 @@ opengv::sac_problems::
   int sampleSize = 4;
   if(_algorithm == TWOPT)
     sampleSize = 2;
-  if(_algorithm == EPNP)
+  if(_algorithm == EPNP || _algorithm == GPNP)
+    sampleSize = 6;
+  return sampleSize;
+}
+
+int
+opengv::sac_problems::
+absolute_pose::AbsolutePoseSacProblem::getLoSampleSize() const
+{
+  int sampleSize = 4;
+  if(_lo_algorithm == TWOPT)
+    sampleSize = 2;
+  if(_lo_algorithm == EPNP || _lo_algorithm == GPNP)
     sampleSize = 6;
   return sampleSize;
 }

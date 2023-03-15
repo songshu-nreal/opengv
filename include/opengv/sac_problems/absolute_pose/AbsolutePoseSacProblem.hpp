@@ -84,6 +84,8 @@ public:
     GP3P_KNEIP = 4,       // non-central [3]
     GP3P_LEE = 5, // non-central [5]
     GP3P_KUKELOVA = 6,    // non-central [6]
+    GPNP = 7,     // non-central [7]
+    UPNP = 8,     // non-central [8]
   } algorithm_t;
 
   /**
@@ -97,7 +99,8 @@ public:
       bool randomSeed = true) :
       sac::SampleConsensusProblem<model_t> (randomSeed),
       _adapter(adapter),
-      _algorithm(algorithm)
+      _algorithm(algorithm),
+      _lo_algorithm(algorithm)
   {
     setUniformIndices(adapter.getNumberCorrespondences());
   };
@@ -118,12 +121,37 @@ public:
       bool randomSeed = true) :
       sac::SampleConsensusProblem<model_t> (randomSeed),
       _adapter(adapter),
-      _algorithm(algorithm)
+      _algorithm(algorithm),
+      _lo_algorithm(algorithm)
   {
     setIndices(indices);
   };
 
-  /**
+  AbsolutePoseSacProblem(adapter_t & adapter, algorithm_t algorithm,
+    algorithm_t lo_algorithm, bool randomSeed = true) :
+      sac::SampleConsensusProblem<model_t> (randomSeed),
+      _adapter(adapter),
+      _algorithm(algorithm),
+      _lo_algorithm(lo_algorithm)
+  {
+    setUniformIndices(adapter.getNumberCorrespondences());
+  };
+
+  AbsolutePoseSacProblem(
+    adapter_t & adapter,
+    algorithm_t algorithm,
+    algorithm_t lo_algorithm,
+      const std::vector<int> & indices,
+      bool randomSeed = true) :
+      sac::SampleConsensusProblem<model_t> (randomSeed),
+      _adapter(adapter),
+      _algorithm(algorithm),
+      _lo_algorithm(lo_algorithm)
+  {
+    setIndices(indices);
+  };
+
+    /**
    * Destructor.
    */
   virtual ~AbsolutePoseSacProblem() {};
@@ -131,7 +159,15 @@ public:
   /**
    * \brief See parent-class.
    */
+  bool computeModelCoefficients(
+      const std::vector<int> &indices,
+      algorithm_t algorithm, model_t & outModel) const;
+
   virtual bool computeModelCoefficients(
+      const std::vector<int> & indices,
+      model_t & outModel) const;
+
+  virtual bool computeLoModelCoefficients(
       const std::vector<int> & indices,
       model_t & outModel) const;
 
@@ -156,11 +192,15 @@ public:
    */
   virtual int getSampleSize() const;
 
+  virtual  int getLoSampleSize() const;
+
 protected:
   /** The adapter holding all input data */
   adapter_t & _adapter;
   /** The algorithm we are using */
   algorithm_t _algorithm;
+
+  algorithm_t _lo_algorithm;
 };
 
 }

@@ -97,7 +97,7 @@ public:
   /** the maximum number of iterations */
   int max_iterations_;
   /** the current number of iterations */
-  int iterations_;
+  int current_iterations_;
   /** the threshold for classifying inliers */
   double threshold_;
   /** the current probability (defines remaining iterations) */

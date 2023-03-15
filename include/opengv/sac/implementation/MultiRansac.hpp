@@ -48,7 +48,7 @@ opengv::sac::MultiRansac<PROBLEM_T>::computeModel(
   typedef PROBLEM_T problem_t;
   typedef typename problem_t::model_t model_t;
 
-  iterations_ = 0;
+  current_iterations_ = 0;
   int n_best_inliers_count = -INT_MAX;
   double k = 1.0;
 
@@ -62,10 +62,10 @@ opengv::sac::MultiRansac<PROBLEM_T>::computeModel(
   const unsigned max_skip = max_iterations_ * 10;
 
   // Iterate
-  while( iterations_ < k && skipped_count < max_skip )
+  while( current_iterations_ < k && skipped_count < max_skip )
   {
     // Get X samples which satisfy the model criteria
-    sac_model_->getSamples( iterations_, selection );
+    sac_model_->getSamples( current_iterations_, selection );
 
     if( selection.empty() )
     {
@@ -122,12 +122,12 @@ opengv::sac::MultiRansac<PROBLEM_T>::computeModel(
       k = log(1.0 - probability_) / log(p_no_outliers);
     }
 
-    ++iterations_;
+    ++current_iterations_;
     if(debug_verbosity_level > 1)
       fprintf(stdout,
           "[sm::RandomSampleConsensus::computeModel] Trial %d out of %f: %d inliers (best is: %d so far).\n",
-          iterations_, k, n_inliers_count, n_best_inliers_count );
-    if(iterations_ > max_iterations_)
+              current_iterations_, k, n_inliers_count, n_best_inliers_count );
+    if(current_iterations_ > max_iterations_)
     {
       if(debug_verbosity_level > 0)
         fprintf(stdout,

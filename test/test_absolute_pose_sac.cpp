@@ -37,6 +37,7 @@
 #include <opengv/absolute_pose/methods.hpp>
 #include <opengv/absolute_pose/CentralAbsoluteAdapter.hpp>
 #include <opengv/sac/Ransac.hpp>
+#include <opengv/sac/LoRansac.hpp>
 #include <opengv/sac_problems/absolute_pose/AbsolutePoseSacProblem.hpp>
 #include <sstream>
 #include <fstream>
@@ -111,7 +112,7 @@ int main( int argc, char** argv )
   //print the results
   std::cout << "the ransac results is: " << std::endl;
   std::cout << ransac.model_coefficients_ << std::endl << std::endl;
-  std::cout << "Ransac needed " << ransac.iterations_ << " iterations and ";
+  std::cout << "Ransac needed " << ransac.current_iterations_ << " iterations and ";
   std::cout << ransac_time << " seconds" << std::endl << std::endl;
   std::cout << "the number of inliers is: " << ransac.inliers_.size();
   std::cout << std::endl << std::endl;

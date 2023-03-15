@@ -84,14 +84,19 @@ opengv::sac::SampleConsensusProblem<M>::drawIndexSample(
 template<typename M>
 void
 opengv::sac::SampleConsensusProblem<M>::getSamples(
-    int &iterations, std::vector<int> &samples)
+    int &iterations, std::vector<int> &samples, bool lo_sample)
 {
+  int sample_size = getSampleSize();
+  if (lo_sample) {
+    sample_size = getLoSampleSize();
+  }
+
   // We're assuming that indices_ have already been set in the constructor
-  if (indices_->size() < (size_t)getSampleSize())
+  if (indices_->size() < (size_t)sample_size)
   {
     fprintf( stderr,
         "[sm::SampleConsensusModel::getSamples] Can not select %zu unique points out of %zu!\n",
-        (size_t) getSampleSize(), indices_->size() );
+        (size_t)sample_size, indices_->size() );
     // one of these will make it stop :)
     samples.clear();
     iterations = std::numeric_limits<int>::max();
@@ -99,7 +104,7 @@ opengv::sac::SampleConsensusProblem<M>::getSamples(
   }
 
   // Get a second point which is different than the first
-  samples.resize( getSampleSize() );
+  samples.resize( sample_size );
 
   for( int iter = 0; iter < max_sample_checks_; ++iter )
   {
@@ -111,7 +116,7 @@ opengv::sac::SampleConsensusProblem<M>::getSamples(
   }
   fprintf( stdout,
       "[sm::SampleConsensusModel::getSamples] WARNING: Could not select %d sample points in %d iterations!\n",
-      getSampleSize(), max_sample_checks_ );
+           sample_size, max_sample_checks_ );
   samples.clear();
 
 }
