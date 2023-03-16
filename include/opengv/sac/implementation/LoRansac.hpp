@@ -263,9 +263,9 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
     LocalOptimization(&best_model_coefficients, &best_model_score);
   }
 
-  fprintf(stdout,
-          "[sm::RandomSampleConsensus::computeModel] Number of local optimization trials: %d\n",
-          number_lo_iterations);
+//  fprintf(stdout,
+//          "[sm::RandomSampleConsensus::computeModel] Number of local optimization trials: %d\n",
+//          number_lo_iterations);
 
   if (lo_options_.final_least_squares_) {
     model_t refined_model = best_model_coefficients;
