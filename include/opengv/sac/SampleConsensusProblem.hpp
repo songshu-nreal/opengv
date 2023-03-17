@@ -116,7 +116,7 @@ public:
    */
   virtual int getSampleSize() const = 0;
 
-  virtual  int getLoSampleSize() const {}
+  virtual  int getLoSampleSize() const { return 0; }
   /**
    * \brief Compute a model from a set of samples. Needs implementation in the
    *        child-class.
@@ -130,7 +130,7 @@ public:
 
   virtual bool computeLoModelCoefficients(
       const std::vector<int> & indices,
-      model_t & outModel) const {}
+      model_t & outModel) const { return false; }
   /**
    * \brief Refine the model coefficients over a given set (inliers). Needs
    *        implementation in the child-class.
