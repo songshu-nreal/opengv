@@ -140,6 +140,21 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
   // local optimization
   int number_lo_iterations = 0;
 
+  if (sac_model_->getInitialModel(best_model_coefficients)) {
+    LocalOptimization(&best_model_coefficients, &best_model_score);
+    sac_model_->selectWithinDistance(
+        best_model_coefficients, threshold_, best_model_inliers, best_model_inlier_distances_to_model);
+    double inlier_ratio = static_cast<double>(best_model_inliers.size()) /
+                          static_cast<double>(sac_model_->getIndices()->size());
+    k = NumRequiredIterations(
+        inlier_ratio, 1.0 - probability_, kMinSampleSize, min_iterations_,
+        max_iterations_);
+//    std::cout << "Inlier ratio: " << best_model_inliers.size() << " / " << sac_model_->getIndices()->size()
+//              << " = " << inlier_ratio << ", k = " << k << std::endl;
+    ++current_iterations_;
+    ++number_lo_iterations;
+  }
+
   unsigned skipped_count = 0;
   // supress infinite loops by just allowing 10 x maximum allowed iterations for
   // invalid model parameters!

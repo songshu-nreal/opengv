@@ -52,9 +52,29 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
   int n_best_inliers_count = -INT_MAX;
   double k = 1.0;
   uint32_t max_num_iterations = std::max(max_iterations_, min_iterations_);
+  const int kMinSampleSize = sac_model_->getSampleSize();
 
   std::vector<int> selection;
   model_t model_coefficients;
+
+  if (sac_model_->getInitialModel(model_coefficients_)) {
+    sac_model_->selectWithinDistance(
+        model_coefficients_, threshold_, inliers_, inlier_distances_to_model_);
+    double inlier_ratio = static_cast<double>(inliers_.size()) /
+                          static_cast<double>(sac_model_->getIndices()->size());
+
+    double p_no_outliers = 1.0 - pow(inlier_ratio, static_cast<double> (kMinSampleSize));
+    p_no_outliers =
+        (std::max) (std::numeric_limits<double>::epsilon(), p_no_outliers);
+    // Avoid division by -Inf
+    p_no_outliers =
+        (std::min) (1.0 - std::numeric_limits<double>::epsilon(), p_no_outliers);
+    // Avoid division by 0.
+    k = log(1.0 - probability_) / log(p_no_outliers);
+//    std::cout << "Inlier ratio: " << inliers_.size() << " / " << sac_model_->getIndices()->size()
+//              << " = " << inlier_ratio << ", k = " << k << std::endl;
+    ++current_iterations_;
+  }
 
   int n_inliers_count = 0;
   unsigned skipped_count = 0;

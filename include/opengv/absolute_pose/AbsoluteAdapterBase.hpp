@@ -70,7 +70,8 @@ public:
    */
   AbsoluteAdapterBase() :
       _t(Eigen::Vector3d::Zero()),
-      _R(Eigen::Matrix3d::Identity()) {};
+      _R(Eigen::Matrix3d::Identity()),
+      _hasT(false) {};
   /**
    * \brief Constructor.
    * \param[in] R A prior or known value for the rotation from the viewpoint
@@ -78,7 +79,7 @@ public:
    */
   AbsoluteAdapterBase( const opengv::rotation_t & R ) :
       _t(Eigen::Vector3d::Zero()),
-      _R(R) {};
+      _R(R), _hasT(false) {};
   /**
    * \brief Constructor.
    * \param[in] t A prior or known value for the position of the viewpoint seen
@@ -90,7 +91,7 @@ public:
       const opengv::translation_t & t,
       const opengv::rotation_t & R ) :
       _t(t),
-      _R(R) {};
+      _R(R), _hasT(true) {};
   /**
    * \brief Destructor.
    */
@@ -163,6 +164,8 @@ public:
    */
   void setR(const opengv::rotation_t & R) { _R = R; };
 
+  bool hasT() const { return _hasT; };
+
 protected:
   /** The prior or known value for the position of the viewpoint seen from the
    * world frame. Initialized to zero if not provided.
@@ -173,6 +176,7 @@ protected:
    */
   opengv::rotation_t _R;
 
+  bool _hasT;
 };
 
 }

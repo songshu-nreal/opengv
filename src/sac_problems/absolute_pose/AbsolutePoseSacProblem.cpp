@@ -33,6 +33,17 @@
 #include <opengv/absolute_pose/methods.hpp>
 
 bool opengv::sac_problems::
+absolute_pose::AbsolutePoseSacProblem::getInitialModel(model_t & outModel) const {
+  if (_adapter.hasT()) {
+    rotation_t rotation = _adapter.getR();
+    translation_t translation = _adapter.gett();
+    outModel.col(3) = translation;
+    outModel.block<3, 3>(0, 0) = rotation;
+  }
+  return _adapter.hasT();
+}
+
+bool opengv::sac_problems::
 absolute_pose::AbsolutePoseSacProblem::computeModelCoefficients(
     const std::vector<int> &indices,
     algorithm_t algorithm,

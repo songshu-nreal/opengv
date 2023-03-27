@@ -117,6 +117,8 @@ public:
   virtual int getSampleSize() const = 0;
 
   virtual  int getLoSampleSize() const {}
+
+  virtual bool getInitialModel(model_t & outModel) const { return false; }
   /**
    * \brief Compute a model from a set of samples. Needs implementation in the
    *        child-class.
