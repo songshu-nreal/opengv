@@ -156,6 +156,7 @@ public:
    */
   virtual ~AbsolutePoseSacProblem() {};
 
+  bool getInitialModel(model_t & outModel) const;
   /**
    * \brief See parent-class.
    */
