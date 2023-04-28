@@ -14,7 +14,7 @@ IF(ROS)
     message("Found catkin. Creating opengv package with catkin")
 
     find_package(catkin_simple REQUIRED)
-    if(ANDROID_NREAL)
+    if(ANDROID_XREAL)
         catkin_simple()
     else()
         find_package(roscpp REQUIRED)
@@ -171,7 +171,7 @@ ELSE()
 
       cs_add_library(${PROJECT_NAME} SHARED ${OPENGV_SOURCE_FILES} ${OPENGV_HEADER_FILES})
 
-      IF(NOT ANDROID_NREAL)
+      IF(NOT ANDROID_XREAL)
           cs_add_library(random_generators SHARED
             test/random_generators.cpp
             test/random_generators.hpp
