@@ -96,14 +96,26 @@ inline void RandomShuffleAndResize(
 template<typename P>
 opengv::sac::LoRansac<P>::LoRansac(
     int maxIterations, int minIterations, double threshold, double probability) :
-    SampleConsensus<P>(maxIterations, minIterations, threshold, probability) {}
+    SampleConsensus<P>(maxIterations, minIterations, threshold, probability),
+    sprt_options_(SPRT::Options()) {}
 
 template<typename P>
 opengv::sac::LoRansac<P>::LoRansac(
     const LORansacOptions& lo_options, int maxIterations, int minIterations,
-    double threshold, double probability):
+    double threshold, double probability) :
     SampleConsensus<P>(maxIterations, minIterations, threshold, probability),
-        lo_options_(lo_options) {
+        lo_options_(lo_options), sprt_options_(SPRT::Options()) {
+  assert(lo_options_.non_min_sample_multiplier_ > 0);
+  assert(lo_options_.min_sample_multiplicator_ > 0);
+  assert(lo_options_.threshold_multiplier_ > 0);
+}
+
+template<typename P>
+opengv::sac::LoRansac<P>::LoRansac(
+    const LORansacOptions& lo_options, const SPRT::Options& sprt_options,
+    int maxIterations, int minIterations, double threshold, double probability) :
+    SampleConsensus<P>(maxIterations, minIterations, threshold, probability),
+      lo_options_(lo_options), sprt_options_(sprt_options) {
   assert(lo_options_.non_min_sample_multiplier_ > 0);
   assert(lo_options_.min_sample_multiplicator_ > 0);
   assert(lo_options_.threshold_multiplier_ > 0);
@@ -140,12 +152,19 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
   // local optimization
   int number_lo_iterations = 0;
 
+  // SPRT
+  SPRT sprt(sprt_options_);
+
+  double init_min_model_score = -1;
   if (sac_model_->getInitialModel(best_model_coefficients)) {
     LocalOptimization(&best_model_coefficients, &best_model_score);
-    sac_model_->selectWithinDistance(
-        best_model_coefficients, threshold_, best_model_inliers, best_model_inlier_distances_to_model);
+    init_min_model_score = best_model_score;
+
+    std::vector<double> best_model_scores;
+    getModelScoreVec(best_model_coefficients, best_model_scores,
+                     best_model_inlier_distances_to_model, best_model_inliers);
     double inlier_ratio = static_cast<double>(best_model_inliers.size()) /
-                          static_cast<double>(sac_model_->getIndices()->size());
+                          static_cast<double>(best_model_scores.size());
     k = NumRequiredIterations(
         inlier_ratio, 1.0 - probability_, kMinSampleSize, min_iterations_,
         max_iterations_);
@@ -153,6 +172,16 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
 //              << " = " << inlier_ratio << ", k = " << k << std::endl;
     ++current_iterations_;
     ++number_lo_iterations;
+
+    if (sprt_options_.is_sprt && inlier_ratio > sprt_options_.epsilon) {
+      sprt_options_.epsilon = inlier_ratio;
+      sprt.Update(sprt_options_);
+//      bool stop_iter = UpdateWithSPRT(sprt, best_model_scores);
+//      if (stop_iter) {
+//        std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
+//        k = current_iterations_;
+//      }
+    }
   }
 
   unsigned skipped_count = 0;
@@ -162,19 +191,36 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
 
   // Iterate
   while( current_iterations_ < k && skipped_count < max_skip ) {
-    if (current_iterations_ == lo_options_.lo_starting_iterations_ &&
-        best_min_model_score < std::numeric_limits<double>::max()) {
-      ++number_lo_iterations;
-      LocalOptimization(&best_model_coefficients, &best_model_score);
+    std::vector<double> best_model_scores;
+    double inlier_ratio = 0.0;
+    if (current_iterations_ == lo_options_.lo_starting_iterations_) {
+      if (best_min_model_score < std::numeric_limits<double>::max()) {
+        if (best_min_model_score > init_min_model_score) {
+          ++number_lo_iterations;
+          LocalOptimization(&best_model_coefficients, &best_model_score);
+        }
 
-      // Updates the number of RANSAC iterations.
-      sac_model_->selectWithinDistance(
-          best_model_coefficients, threshold_, best_model_inliers, best_model_inlier_distances_to_model);
-      double inlier_ratio = static_cast<double>(best_model_inliers.size()) /
-                            static_cast<double>(sac_model_->getIndices()->size());
-      k = NumRequiredIterations(
-          inlier_ratio, 1.0 - probability_, kMinSampleSize, min_iterations_,
-          max_iterations_);
+        // Updates the number of RANSAC iterations.
+        getModelScoreVec(best_model_coefficients, best_model_scores,
+                         best_model_inlier_distances_to_model, best_model_inliers);
+        inlier_ratio = static_cast<double>(best_model_inliers.size()) /
+                       static_cast<double>(best_model_scores.size());
+        k = NumRequiredIterations(
+            inlier_ratio, 1.0 - probability_, kMinSampleSize, min_iterations_,
+            max_iterations_);
+      }
+
+      if (sprt_options_.is_sprt && !best_model_scores.empty()) {
+        if (inlier_ratio > sprt_options_.epsilon) {
+          sprt_options_.epsilon = inlier_ratio;
+          sprt.Update(sprt_options_);
+        }
+        bool stop_iter = UpdateWithSPRT(sprt, best_model_scores);
+        if (stop_iter) {
+          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
+          break;
+        }
+      }
     }
 
     std::vector<int> current_selection;
@@ -196,11 +242,6 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
       ++skipped_count;
       continue;
     }
-
-    // Select the inliers that are within threshold_ from the model
-    //sac_model_->selectWithinDistance( model_coefficients, threshold_, inliers );
-    //if(inliers.empty() && k > 1.0)
-    //  continue;
 
     // compute score
     ScoreModel(current_model_coefficients, threshold_, &current_model_score);
@@ -245,27 +286,41 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
       }
 
       // Updates the number of RANSAC iterations.
-      sac_model_->selectWithinDistance(
-          best_model_coefficients, threshold_, best_model_inliers, best_model_inlier_distances_to_model);
-
-      double inlier_ratio = static_cast<double>(best_model_inliers.size()) /
-                            static_cast<double>(sac_model_->getIndices()->size());
+      getModelScoreVec(best_model_coefficients, best_model_scores,
+                       best_model_inlier_distances_to_model, best_model_inliers);
+      inlier_ratio = static_cast<double>(best_model_inliers.size()) /
+                            static_cast<double>(best_model_scores.size());
       k = NumRequiredIterations(
           inlier_ratio, 1.0 - probability_, kMinSampleSize, min_iterations_,
           max_iterations_);
+
+      if (kRunLO && sprt_options_.is_sprt && !best_model_scores.empty()) {
+        if (inlier_ratio > sprt_options_.epsilon) {
+          sprt_options_.epsilon = inlier_ratio;
+          sprt.Update(sprt_options_);
+        }
+        bool stop_iter = UpdateWithSPRT(sprt, best_model_scores);
+        if (stop_iter) {
+          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
+          break;
+        }
+      }
     }
 
-    if(debug_verbosity_level > 1)
+    if(debug_verbosity_level > 1) {
       fprintf(stdout,
               "[sm::RandomSampleConsensus::computeModel] Trial %d out of %f (best is: %d so far).\n",
-              current_iterations_, k, best_model_inliers.size() );
-    if(current_iterations_ > k)
-    {
-      if(debug_verbosity_level > 0)
+              current_iterations_, k, best_model_inliers.size());
+    }
+
+    if(current_iterations_ > k) {
+      if(debug_verbosity_level > 0) {
         fprintf(stdout,
                 "[sm::RandomSampleConsensus::computeModel] RANSAC reached the maximum number of trials.\n");
+      }
       break;
     }
+
     ++current_iterations_;
   }
 
@@ -426,3 +481,39 @@ void opengv::sac::LoRansac<PROBLEM_T>::UpdateBestModel(
     *m_best = m_curr;
   }
 }
+
+template<typename PROBLEM_T>
+void opengv::sac::LoRansac<PROBLEM_T>::getModelScoreVec(
+    const model_t& best_model_coefficients, std::vector<double>& best_model_scores,
+    std::vector<double>& best_model_inlier_distances_to_model,
+    std::vector<int>& best_model_inliers) const {
+  best_model_scores.clear();
+  sac_model_->getDistancesToModel(best_model_coefficients, best_model_scores);
+
+  best_model_inliers.clear();
+  best_model_inlier_distances_to_model.clear();
+  for (size_t i = 0; i < best_model_scores.size(); ++i) {
+    if (best_model_scores[i] < threshold_) {
+      best_model_inliers.push_back( (*(sac_model_->getIndices()))[i] );
+      best_model_inlier_distances_to_model.emplace_back(best_model_scores[i]);
+    }
+  }
+}
+
+template<typename PROBLEM_T>
+bool opengv::sac::LoRansac<PROBLEM_T>::UpdateWithSPRT(
+    const SPRT& sprt, std::vector<double>& best_model_scores) const {
+  std::random_device device;
+  std::mt19937 generator(device());
+  std::shuffle(best_model_scores.begin(), best_model_scores.end(), generator);
+
+  size_t num_eval_inliers = 0;
+  size_t num_eval_samples = 0;
+  bool stop_iter = sprt.Evaluate(
+      best_model_scores, threshold_, &num_eval_inliers, &num_eval_samples);
+  std::cout << "SPRT: " << num_eval_inliers << " / " << num_eval_samples
+            << " inliers, stop_iter = " << stop_iter
+            << ", current_iterations_ = " << current_iterations_ << std::endl;
+  return stop_iter;
+}
+
