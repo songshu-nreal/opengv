@@ -1,4 +1,6 @@
-// File: sprt.hpp
+#include "opengv/sac/sprt.hpp"
+#include <iostream>
+
 opengv::sac::SPRT::SPRT(const Options& options) { Update(options); }
 
 void opengv::sac::SPRT::Update(const Options& options) {
