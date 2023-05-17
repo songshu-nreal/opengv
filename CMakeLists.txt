@@ -95,6 +95,7 @@ set(OPENGV_SOURCE_FILES
   src/relative_pose/NoncentralRelativeAdapter.cpp
   src/relative_pose/CentralRelativeMultiAdapter.cpp
   src/relative_pose/NoncentralRelativeMultiAdapter.cpp
+  src/sac/sprt.cpp
   src/triangulation/methods.cpp
   src/point_cloud/methods.cpp
   src/point_cloud/PointCloudAdapter.cpp

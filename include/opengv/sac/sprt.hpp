@@ -1,5 +1,5 @@
-#ifndef OPENGV_SAC_SPRT_H
-#define OPENGV_SAC_SPRT_H
+#ifndef OPENGV_SAC_SPRT_H_
+#define OPENGV_SAC_SPRT_H_
 
 #include <cmath>
 #include <cstddef>
@@ -55,7 +55,4 @@ private:
 };
 } // namespace sac
 } // namespace opengv
-
-#include "implementation/sprt.hpp"
-
-#endif //OPENGV_SAC_SPRT_H
+#endif //OPENGV_SAC_SPRT_H_
