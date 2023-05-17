@@ -40,6 +40,7 @@
 
 #include <vector>
 #include <opengv/sac/SampleConsensus.hpp>
+#include <opengv/sac/sprt.hpp>
 #include <cstdio>
 #include <numeric>
 #include <random>
@@ -117,14 +118,23 @@ public:
       int maxIterations = 1000,
       int minIterations = 100,
       double threshold = 1.0,
-      double probability = 0.99 );
+      double probability = 0.99);
 
   LoRansac(
       const LORansacOptions& lo_options,
       int maxIterations = 1000,
       int minIterations = 100,
       double threshold = 1.0,
-      double probability = 0.99 );
+      double probability = 0.99);
+
+  LoRansac(
+      const LORansacOptions& lo_options,
+      const SPRT::Options& sprt_options,
+      int maxIterations = 1000,
+      int minIterations = 100,
+      double threshold = 1.0,
+      double probability = 0.99);
+
   /**
    * \brief Destructor.
    */
@@ -146,7 +156,17 @@ public:
   void UpdateBestModel(
       double score_curr, const model_t& m_curr, double* score_best, model_t* m_best) const;
 
+  void getModelScoreVec(
+      const model_t& best_model_coefficients, std::vector<double>& best_model_scores,
+      std::vector<double>& best_model_inlier_distances_to_model,
+      std::vector<int>& best_model_inliers) const;
+
+  bool UpdateWithSPRT(
+      const SPRT& sprt, std::vector<double>& best_model_scores) const;
+
   LORansacOptions lo_options_;
+  // SPRT
+  SPRT::Options sprt_options_;
 };
 
 } // namespace sac
