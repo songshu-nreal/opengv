@@ -503,10 +503,6 @@ void opengv::sac::LoRansac<PROBLEM_T>::getModelScoreVec(
 template<typename PROBLEM_T>
 bool opengv::sac::LoRansac<PROBLEM_T>::UpdateWithSPRT(
     const SPRT& sprt, std::vector<double>& best_model_scores) const {
-  std::random_device device;
-  std::mt19937 generator(device());
-  std::shuffle(best_model_scores.begin(), best_model_scores.end(), generator);
-
   size_t num_eval_inliers = 0;
   size_t num_eval_samples = 0;
   bool stop_iter = sprt.Evaluate(
