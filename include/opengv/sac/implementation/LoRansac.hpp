@@ -217,7 +217,7 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
         }
         bool stop_iter = UpdateWithSPRT(sprt, best_model_scores);
         if (stop_iter) {
-          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
+//          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
           break;
         }
       }
@@ -301,7 +301,7 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
         }
         bool stop_iter = UpdateWithSPRT(sprt, best_model_scores);
         if (stop_iter) {
-          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
+//          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
           break;
         }
       }
@@ -507,9 +507,9 @@ bool opengv::sac::LoRansac<PROBLEM_T>::UpdateWithSPRT(
   size_t num_eval_samples = 0;
   bool stop_iter = sprt.Evaluate(
       best_model_scores, threshold_, &num_eval_inliers, &num_eval_samples);
-  std::cout << "SPRT: " << num_eval_inliers << " / " << num_eval_samples
-            << " inliers, stop_iter = " << stop_iter
-            << ", current_iterations_ = " << current_iterations_ << std::endl;
+//  std::cout << "SPRT: " << num_eval_inliers << " / " << num_eval_samples
+//            << " inliers, stop_iter = " << stop_iter
+//            << ", current_iterations_ = " << current_iterations_ << std::endl;
   return stop_iter;
 }
 

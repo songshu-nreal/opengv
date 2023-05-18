@@ -40,16 +40,16 @@ bool opengv::sac::SPRT::Evaluate(const std::vector<double>& residuals,
     }
 
     if (likelihood_ratio > decision_threshold_) {
-      std::cout << "decision_threshold_: " << decision_threshold_
-                << ", likelihood_ratio: " << likelihood_ratio << std::endl;
+//      std::cout << "decision_threshold_: " << decision_threshold_
+//                << ", likelihood_ratio: " << likelihood_ratio << std::endl;
       *num_eval_samples = i + 1;
       return false;
     }
   }
 
   *num_eval_samples = residuals.size();
-  std::cout << "decision_threshold_: " << decision_threshold_
-            << ", likelihood_ratio: " << likelihood_ratio << std::endl;
+//  std::cout << "decision_threshold_: " << decision_threshold_
+//            << ", likelihood_ratio: " << likelihood_ratio << std::endl;
   return true;
 }
 
