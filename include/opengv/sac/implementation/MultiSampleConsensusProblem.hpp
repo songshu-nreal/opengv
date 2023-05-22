@@ -87,7 +87,7 @@ opengv::sac::MultiSampleConsensusProblem<M>::drawIndexSample(
 template<typename M>
 void
 opengv::sac::MultiSampleConsensusProblem<M>::getSamples(
-    int &iterations, std::vector< std::vector<int> > &samples )
+    size_t &iterations, std::vector< std::vector<int> > &samples )
 {
   std::vector<int> sampleSizes = getSampleSizes();
   samples.resize( sampleSizes.size() );

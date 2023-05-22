@@ -91,7 +91,7 @@ public:
    * \param[out] samples The multi-indices of the samples we attempt to use.
    */
   virtual void getSamples(
-      int &iterations,
+      size_t &iterations,
       std::vector< std::vector<int> > &samples );
 
   /**

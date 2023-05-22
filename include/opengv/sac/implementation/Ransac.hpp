@@ -51,7 +51,7 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
   current_iterations_ = 0;
   int n_best_inliers_count = -INT_MAX;
   double k = 1.0;
-  uint32_t max_num_iterations = std::max(max_iterations_, min_iterations_);
+  size_t max_num_iterations = std::max(max_iterations_, min_iterations_);
   const int kMinSampleSize = sac_model_->getSampleSize();
 
   std::vector<int> selection;
@@ -83,21 +83,16 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
   const unsigned max_skip = max_num_iterations * 10;
 
   // Iterate
-  while( current_iterations_ < k && skipped_count < max_skip )
-  {
+  while( current_iterations_ < k && skipped_count < max_skip ) {
     // Get X samples which satisfy the model criteria
     sac_model_->getSamples( current_iterations_, selection );
 
-    if(selection.empty()) 
-    {
-      fprintf(stderr,
-          "[sm::RandomSampleConsensus::computeModel] No samples could be selected!\n");
+    if(selection.empty()) {
       break;
     }
 
     // Search for inliers in the point cloud for the current plane model M
-    if(!sac_model_->computeModelCoefficients( selection, model_coefficients ))
-    {
+    if(!sac_model_->computeModelCoefficients( selection, model_coefficients )) {
       //++current_iterations;
       ++ skipped_count;
       continue;
@@ -112,8 +107,7 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
         model_coefficients, threshold_ );
 
     // Better match ?
-    if(n_inliers_count > n_best_inliers_count)
-    {
+    if(n_inliers_count > n_best_inliers_count) {
       n_best_inliers_count = n_inliers_count;
 
       // Save the current model/inlier/coefficients selection as being the best so far
@@ -134,26 +128,13 @@ opengv::sac::Ransac<PROBLEM_T>::computeModel(
     }
 
     ++current_iterations_;
-    if(debug_verbosity_level > 1)
-      fprintf(stdout,
-          "[sm::RandomSampleConsensus::computeModel] Trial %d out of %f: %d inliers (best is: %d so far).\n",
-              current_iterations_, k, n_inliers_count, n_best_inliers_count );
-    if(current_iterations_ > max_num_iterations)
-    {
-      if(debug_verbosity_level > 0)
-        fprintf(stdout,
-            "[sm::RandomSampleConsensus::computeModel] RANSAC reached the maximum number of trials.\n");
+
+    if(current_iterations_ > max_num_iterations) {
       break;
     }
   }
 
-  if(debug_verbosity_level > 0)
-    fprintf(stdout,
-        "[sm::RandomSampleConsensus::computeModel] Model: %zu size, %d inliers.\n",
-        model_.size(), n_best_inliers_count );
-
-  if(model_.empty())
-  {
+  if(model_.empty()) {
     inliers_.clear();
     return (false);
   }
