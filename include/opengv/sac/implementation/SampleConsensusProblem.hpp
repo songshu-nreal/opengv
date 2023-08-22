@@ -84,7 +84,7 @@ opengv::sac::SampleConsensusProblem<M>::drawIndexSample(
 template<typename M>
 void
 opengv::sac::SampleConsensusProblem<M>::getSamples(
-    int &iterations, std::vector<int> &samples, bool lo_sample)
+    size_t &iterations, std::vector<int> &samples, bool lo_sample)
 {
   int sample_size = getSampleSize();
   if (lo_sample) {

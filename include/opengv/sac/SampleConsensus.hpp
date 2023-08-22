@@ -102,11 +102,11 @@ public:
   //private:
   
   /** the maximum number of iterations */
-  int max_iterations_;
+  size_t max_iterations_;
   /** the minimum number of iterations */
-  int min_iterations_;
+  size_t min_iterations_;
   /** the current number of iterations */
-  int current_iterations_;
+  size_t current_iterations_;
   /** the threshold for classifying inliers */
   double threshold_;
   /** the current probability (defines remaining iterations) */

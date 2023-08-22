@@ -132,7 +132,7 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
   typedef PROBLEM_T problem_t;
   typedef typename problem_t::model_t model_t;
   // Initialize parameters
-  const int kMinSampleSize = sac_model_->getSampleSize();
+  const size_t kMinSampleSize = sac_model_->getSampleSize();
   current_iterations_ = 0; // num_iteration
   double k = 1.0; // max_num_iterations compute by probability
   uint32_t max_num_iterations = std::max(max_iterations_, min_iterations_);
@@ -193,7 +193,7 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
   while( current_iterations_ < k && skipped_count < max_skip ) {
     std::vector<double> best_model_scores;
     double inlier_ratio = 0.0;
-    if (current_iterations_ == lo_options_.lo_starting_iterations_) {
+    if (static_cast<uint32_t>(current_iterations_) == lo_options_.lo_starting_iterations_) {
       if (best_min_model_score < std::numeric_limits<double>::max()) {
         if (best_min_model_score > init_min_model_score) {
           ++number_lo_iterations;
@@ -217,7 +217,7 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
         }
         bool stop_iter = UpdateWithSPRT(sprt, best_model_scores);
         if (stop_iter) {
-          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
+//          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
           break;
         }
       }
@@ -231,8 +231,6 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
     sac_model_->getSamples(current_iterations_, current_selection);
 
     if (current_selection.empty()) {
-      fprintf(stderr,
-              "[sm::RandomSampleConsensus::computeModel] No samples could be selected!\n");
       break;
     }
 
@@ -301,23 +299,13 @@ opengv::sac::LoRansac<PROBLEM_T>::computeModel(
         }
         bool stop_iter = UpdateWithSPRT(sprt, best_model_scores);
         if (stop_iter) {
-          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
+//          std::cout << "SPRT stop at iteration " << current_iterations_ << std::endl;
           break;
         }
       }
     }
 
-    if(debug_verbosity_level > 1) {
-      fprintf(stdout,
-              "[sm::RandomSampleConsensus::computeModel] Trial %d out of %f (best is: %d so far).\n",
-              current_iterations_, k, best_model_inliers.size());
-    }
-
     if(current_iterations_ > k) {
-      if(debug_verbosity_level > 0) {
-        fprintf(stdout,
-                "[sm::RandomSampleConsensus::computeModel] RANSAC reached the maximum number of trials.\n");
-      }
       break;
     }
 
@@ -462,7 +450,7 @@ void opengv::sac::LoRansac<PROBLEM_T>::LeastSquaresFit(
   std::vector<double> inlier_distances_to_model;
   sac_model_->selectWithinDistance(
       *model, thresh, inliers, inlier_distances_to_model);
-  if (inliers.size() < sac_model_->getSampleSize()) {
+  if (inliers.size() < static_cast<size_t>(sac_model_->getSampleSize())) {
     return;
   }
   int lsq_data_size = std::min(kLSqSampleSize, static_cast<int>(inliers.size()));
@@ -507,9 +495,9 @@ bool opengv::sac::LoRansac<PROBLEM_T>::UpdateWithSPRT(
   size_t num_eval_samples = 0;
   bool stop_iter = sprt.Evaluate(
       best_model_scores, threshold_, &num_eval_inliers, &num_eval_samples);
-  std::cout << "SPRT: " << num_eval_inliers << " / " << num_eval_samples
-            << " inliers, stop_iter = " << stop_iter
-            << ", current_iterations_ = " << current_iterations_ << std::endl;
+//  std::cout << "SPRT: " << num_eval_inliers << " / " << num_eval_samples
+//            << " inliers, stop_iter = " << stop_iter
+//            << ", current_iterations_ = " << current_iterations_ << std::endl;
   return stop_iter;
 }
 

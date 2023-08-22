@@ -87,7 +87,7 @@ public:
    *                       parameter keeps track of the iterations.
    * \param[out] samples The indices of the samples we attempt to use.
    */
-  virtual void getSamples( int &iterations, std::vector<int> &samples, bool lo_sample = false);
+  virtual void getSamples( size_t &iterations, std::vector<int> &samples, bool lo_sample = false);
 
   /**
    * \brief Check if a set of samples for model generation is degenerate
