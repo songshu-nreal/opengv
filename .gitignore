@@ -1,3 +1,44 @@
-bin
-build
-lib
+# Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Visual Studio files
+.vs
+*.sdf
+*.opensdf
+*.VC.opendb
+*.VC.db
+*.suo
+*.user
+_ReSharper.Caches/
+Win32-Debug/
+Win32-Release/
+x64/
+x64-Debug/
+x64-Release/
+Testing/
+
+# MacOS:
+.DS_Store
+
+# Android
+.gradle
+local.properties
+
+# Project
+build*/
+run.sh
+obfuscate.log
+install/
+tmp
+__pycache__
+output
+# Custom:
+.idea/
+.vscode
+.ccls-cache/
+compile_commands.json
+log
+docker/.conan2
+docker/.ccache
