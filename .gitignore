@@ -42,3 +42,16 @@ compile_commands.json
 log
 docker/.conan2
 docker/.ccache
+compile.sh
+CMakeUserPresets.json
+
+build_*
+/.fleet/
+/.idea/
+/CMakeUserPresets.json
+obfuscate.log
+CMakeUserPresets.json
+external/project
+/cmake-build-debug/
+/run.sh.example
+/conan_profiles/
